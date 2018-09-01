@@ -74,6 +74,14 @@ namespace Assets.Libs.Authsome
             }
             else
             {
+                if (result != null)
+                {
+                    result(new HttpResponseWrapper<T>()
+                    {
+                        httpStatusCode = httpStatusCode
+                    });
+                }
+
                 yield return null;
             }
         }

@@ -30,7 +30,7 @@ namespace AuthsomeServer.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] string firstName)
+        public ActionResult Put(int id, [FromBody] User user)
         {
             if (id == 5)
             {
@@ -42,7 +42,7 @@ namespace AuthsomeServer.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public ActionResult Delete(int id)
         {
             if (id == 5)
             {

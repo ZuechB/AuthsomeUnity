@@ -47,20 +47,21 @@ namespace Assets.Scripts
 
         public void TestPut_Click()
         {
-            AuthsomeService.instance.Post<User>("/api/Login/5", new LoginRequest()
+            AuthsomeService.instance.Put<User>("/api/User/5", new User()
             {
-                Email = Email.text,
-                Password = Password.text
+                firstName = "new first name",
+                lastName = "new last name",
+                email = "new email"
 
             }, result => {
 
-                if (result.httpStatusCode == System.Net.HttpStatusCode.OK && result.Content != null)
+                if (result.httpStatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    Debug.Log("Welcome : " + result.Content.firstName + " " + result.Content.lastName);
+                    Debug.Log("User updated");
                 }
                 else
                 {
-                    Debug.Log("Login failed :(");
+                    Debug.Log("failed to update user");
                 }
             });
         }
