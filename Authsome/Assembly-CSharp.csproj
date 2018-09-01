@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Libs\Authsome\AuthsomeService.cs" />
+    <Compile Include="Assets\Libs\Authsome\HeaderRequest.cs" />
     <Compile Include="Assets\Libs\Authsome\HttpResponseWrapper.cs" />
     <Compile Include="Assets\Libs\Authsome\HttpScheme.cs" />
     <Compile Include="Assets\Models\LoginRequest.cs" />

@@ -17,28 +17,48 @@ namespace Assets.Libs.Authsome
             instance = this;
         }
 
-        public void Post<T>(string url, object obj, Action<HttpResponseWrapper<T>> result = null)
+        public void Post<T>(string url, object obj, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
-            StartCoroutine(SendRequest<T>(BaseUrl + url, "POST", obj, result));
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+            
+            StartCoroutine(SendRequest<T>(url, "POST", obj, HeaderBuilder, result));
         }
 
-        public void Get<T>(string url, Action<HttpResponseWrapper<T>> result = null)
+        public void Get<T>(string url, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
-            StartCoroutine(SendRequest<T>(BaseUrl + url, "GET", null, result));
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            StartCoroutine(SendRequest<T>(url, "GET", null, HeaderBuilder, result));
         }
 
-        public void Delete<T>(string url, Action<HttpResponseWrapper<T>> result = null)
+        public void Delete<T>(string url, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
-            StartCoroutine(SendRequest<T>(BaseUrl + url, "DELETE", null, result));
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            StartCoroutine(SendRequest<T>(url, "DELETE", null, HeaderBuilder, result));
         }
 
-        public void Put<T>(string url, object obj, Action<HttpResponseWrapper<T>> result = null)
+        public void Put<T>(string url, object obj, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
-            StartCoroutine(SendRequest<T>(BaseUrl + url, "PUT", obj, result));
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            StartCoroutine(SendRequest<T>(url, "PUT", obj, HeaderBuilder, result));
         }
 
 
-        IEnumerator SendRequest<T>(string url, string method, object obj, Action<HttpResponseWrapper<T>> result = null)
+        IEnumerator SendRequest<T>(string url, string method, object obj, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
             var request = new UnityWebRequest(url, method);
 
@@ -50,7 +70,13 @@ namespace Assets.Libs.Authsome
             }
 
             request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+
             request.SetRequestHeader("Content-Type", "application/json");
+
+            if (HeaderBuilder != null)
+            {
+                HeaderBuilder(new HeaderRequest(request));
+            }
 
             yield return request.SendWebRequest();
 
@@ -83,6 +109,18 @@ namespace Assets.Libs.Authsome
                 }
 
                 yield return null;
+            }
+        }
+
+        private bool IsAbsolute(string url)
+        {
+            if (url.Contains("http://") || url.Contains("https://"))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }

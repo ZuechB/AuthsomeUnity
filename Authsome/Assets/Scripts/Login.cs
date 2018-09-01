@@ -17,11 +17,11 @@ namespace Assets.Scripts
                 Email = Email.text,
                 Password = Password.text
 
-            }, result => {
+            }, result: data => {
 
-                if (result.httpStatusCode == System.Net.HttpStatusCode.OK && result.Content != null)
+                if (data.httpStatusCode == System.Net.HttpStatusCode.OK && data.Content != null)
                 {
-                    Debug.Log("Welcome : " + result.Content.firstName + " " + result.Content.lastName);
+                    Debug.Log("Welcome : " + data.Content.firstName + " " + data.Content.lastName);
                 }
                 else
                 {
@@ -32,11 +32,11 @@ namespace Assets.Scripts
 
         public void TestGet_Click()
         {
-            AuthsomeService.instance.Get<User>("/api/User/5", result => {
+            AuthsomeService.instance.Get<User>("/api/User/5", result: data => {
 
-                if (result.httpStatusCode == System.Net.HttpStatusCode.OK && result.Content != null)
+                if (data.httpStatusCode == System.Net.HttpStatusCode.OK && data.Content != null)
                 {
-                    Debug.Log("got the user : " + result.Content.firstName + " " + result.Content.lastName);
+                    Debug.Log("got the user : " + data.Content.firstName + " " + data.Content.lastName);
                 }
                 else
                 {
@@ -53,9 +53,9 @@ namespace Assets.Scripts
                 lastName = "new last name",
                 email = "new email"
 
-            }, result => {
+            }, result: data => {
 
-                if (result.httpStatusCode == System.Net.HttpStatusCode.OK)
+                if (data.httpStatusCode == System.Net.HttpStatusCode.OK)
                 {
                     Debug.Log("User updated");
                 }
@@ -68,15 +68,44 @@ namespace Assets.Scripts
 
         public void TestDelete_Click()
         {
-            AuthsomeService.instance.Delete<object>("/api/User/5", result => {
+            AuthsomeService.instance.Delete<object>("/api/User/5", result: data => {
 
-                if (result.httpStatusCode == System.Net.HttpStatusCode.OK)
+                if (data.httpStatusCode == System.Net.HttpStatusCode.OK)
                 {
                     Debug.Log("User Deleted");
                 }
                 else
                 {
                     Debug.Log("Failed to delete");
+                }
+            });
+        }
+
+
+        public void TestHeader_Click()
+        {
+            // note this will not work with the server sample, this is just an example showing you how you can do it
+
+            var testUser = new User()
+            {
+                firstName = "test",
+                lastName = "test2",
+                email = "test@test.com"
+            };
+
+            AuthsomeService.instance.Post<object>("http://myfullurlworks.com", testUser, HeaderBuilder: header => {
+
+                header.IncludeHeader("MyKey", "MyValue");
+
+            }, result: data => {
+
+                if (data.httpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Debug.Log("test");
+                }
+                else
+                {
+                    Debug.Log("failed");
                 }
             });
         }
