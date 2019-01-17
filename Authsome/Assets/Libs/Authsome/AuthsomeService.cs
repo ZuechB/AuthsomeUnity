@@ -1,115 +1,192 @@
-﻿using System;
-using System.Collections;
-using System.Net;
+﻿using Authsome.Models;
+using Authsome.Portable.Builder;
+using Authsome.Portable.Extentions;
+using Authsome.Portable.Models;
+using Newtonsoft.Json;
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 
-namespace Assets.Libs.Authsome
+namespace Authsome
 {
     public class AuthsomeService : MonoBehaviour
     {
         public static AuthsomeService instance;
 
-        public string BaseUrl = "";
+        private Action<HttpResponseWrapper<TokenResponse>> RefreshedToken;
+
+        public OAuth oAuth { get; set; }
+        public Provider Provider;
 
         private void Start()
         {
             instance = this;
+
+            oAuth = new OAuth();
+            oAuth.Provider = Provider;
         }
 
-        public void Post<T>(string url, object obj, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        public string BaseUrl;
+
+        public void InitGlobalRefreshToken(Action<HttpResponseWrapper<TokenResponse>> RefreshedToken = null)
         {
-            if (!IsAbsolute(url))
-            {
-                url = BaseUrl + url;
-            }
-            
-            StartCoroutine(SendRequest<T>(url, "POST", obj, HeaderBuilder, result));
+            this.RefreshedToken = RefreshedToken;
         }
 
-        public void Get<T>(string url, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
-        {
-            if (!IsAbsolute(url))
-            {
-                url = BaseUrl + url;
-            }
-
-            StartCoroutine(SendRequest<T>(url, "GET", null, HeaderBuilder, result));
-        }
-
-        public void Delete<T>(string url, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        public async Task GetAsync<T>(string url, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
             if (!IsAbsolute(url))
             {
                 url = BaseUrl + url;
             }
 
-            StartCoroutine(SendRequest<T>(url, "DELETE", null, HeaderBuilder, result));
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Get, url, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
         }
 
-        public void Put<T>(string url, object obj, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        public async Task PostAsync<T>(string url, object body, string mediaType = "application/json", Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
             if (!IsAbsolute(url))
             {
                 url = BaseUrl + url;
             }
 
-            StartCoroutine(SendRequest<T>(url, "PUT", obj, HeaderBuilder, result));
+            var factory = new RequestFactory();
+            HttpContent bodyContent = null;
+            if (body != null)
+            {
+                bodyContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, mediaType);
+            }
+            await factory.Request<T>(HttpOption.Post, url, bodyContent, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PostAsync<T>(string url, object body, MediaType mediaType, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            HttpContent bodyContent = null;
+            if (body != null)
+            {
+                bodyContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, mediaType.GetMediaType());
+            }
+            await factory.Request<T>(HttpOption.Post, url, bodyContent, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PostAsync<T>(string url, FormUrlEncodedContent content = null, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Post, url, content, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PostAsync<T>(string url, StringContent content = null, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Post, url, content, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PostAsync<T>(string url, MultipartFormDataContent content, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Post, url, content, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PutAsync<T>(string url, FormUrlEncodedContent content = null, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Put, url, content, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PutAsync<T>(string url, object body, string mediaType = "application/json", Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            HttpContent bodyContent = null;
+            if (body != null)
+            {
+                bodyContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, mediaType);
+            }
+            await factory.Request<T>(HttpOption.Put, url, bodyContent, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PutAsync<T>(string url, object body, MediaType mediaType, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            HttpContent bodyContent = null;
+            if (body != null)
+            {
+                bodyContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, mediaType.GetMediaType());
+            }
+            await factory.Request<T>(HttpOption.Put, url, bodyContent, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PutAsync<T>(string url, StringContent content = null, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Put, url, content, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
+        }
+
+        public async Task PutAsync<T>(string url, MultipartFormDataContent content, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        {
+            if (!IsAbsolute(url))
+            {
+                url = BaseUrl + url;
+            }
+
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Put, url, content, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
         }
 
 
-        IEnumerator SendRequest<T>(string url, string method, object obj, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
+        public async Task DeleteAsync<T>(string url, Action<IHeaderRequest> HeaderBuilder = null, Action<HttpResponseWrapper<T>> result = null)
         {
-            var request = new UnityWebRequest(url, method);
-
-            if (obj != null)
+            if (!IsAbsolute(url))
             {
-                var body = JsonUtility.ToJson(obj);
-                byte[] bodyRaw = new System.Text.UTF8Encoding().GetBytes(body);
-                request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                url = BaseUrl + url;
             }
 
-            request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            if (HeaderBuilder != null)
-            {
-                HeaderBuilder(new HeaderRequest(request));
-            }
-
-            yield return request.SendWebRequest();
-
-            var httpStatusCode = (HttpStatusCode)request.responseCode;
-
-            if (!request.isHttpError)
-            {
-                if (request.responseCode == (long)HttpStatusCode.OK)
-                {
-                    var returnObject = request.downloadHandler.text;
-
-                    if (result != null)
-                    {
-                        result(new HttpResponseWrapper<T>()
-                        {
-                            Content = JsonUtility.FromJson<T>(returnObject),
-                            httpStatusCode = httpStatusCode
-                        });
-                    }
-                }
-            }
-            else
-            {
-                if (result != null)
-                {
-                    result(new HttpResponseWrapper<T>()
-                    {
-                        httpStatusCode = httpStatusCode
-                    });
-                }
-
-                yield return null;
-            }
+            var factory = new RequestFactory();
+            await factory.Request<T>(HttpOption.Delete, url, oAuth: oAuth, HeaderBuilder: HeaderBuilder, RefreshedToken: RefreshedToken, result: result);
         }
 
         private bool IsAbsolute(string url)
@@ -125,68 +202,3 @@ namespace Assets.Libs.Authsome
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//if (request.isHttpError)
-//{
-//    //Debug.Log("Something went wrong, and returned error: " + request.error);
-//    requestErrorOccurred = true;
-//}
-//else
-//{
-//    if (request.responseCode == 200)
-//    {
-//        var result = JsonUtility.FromJson<LoginResult>(request.downloadHandler.text);
-//        Debug.Log("Welcome : " + result.firstName + " " + result.lastName);
-//    }
-//    else if (request.responseCode == 201)
-//    {
-//        //Debug.Log("Request finished successfully! New User created successfully.");
-//    }
-//    else if (request.responseCode == 401)
-//    {
-//        //Debug.Log("Error 401: Unauthorized.");
-//        requestErrorOccurred = true;
-//    }
-//    else
-//    {
-//        //Debug.Log("Request failed (status:" + request.responseCode + ").");
-//        requestErrorOccurred = true;
-//    }
-
-//    if (!requestErrorOccurred)
-//    {
-//        yield return null;
-//        // process results
-//    }
-//}
